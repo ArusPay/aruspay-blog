@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { alternates, absolute, BASE } from '../lib/seo';
+import { alternates, absolute, jsonLdScript, BASE } from '../lib/seo';
 import { BLOG_ENV, type Lang } from '../lib/posts';
 import { ui, otherLang } from '../i18n/ui';
 
@@ -12,9 +12,11 @@ interface Props {
 const { title, description, lang, canonicalPath, slug = null, ogImage, jsonLd = [], alternateLinks } = Astro.props;
 const htmlLang = lang === 'x-default' ? 'en' : lang;
 const t = ui[htmlLang];
-const switchHref = lang === 'x-default' ? null : slug ? `${BASE}/${otherLang(lang)}/${slug}/` : `${BASE}/${otherLang(lang)}/`;
 const og = ogImage ?? absolute(`${BASE}/logo.png`);
 const links = alternateLinks ?? alternates(slug);
+const switchHref = lang === 'x-default' ? null
+  : alternateLinks ? (() => { const h = alternateLinks.find((a) => a.hreflang === otherLang(lang))?.href; return h ? new URL(h).pathname : null; })()
+  : slug ? `${BASE}/${otherLang(lang)}/${slug}/` : `${BASE}/${otherLang(lang)}/`;
 ---
 <!doctype html>
 <html lang={htmlLang}>
@@ -35,14 +37,14 @@ const links = alternateLinks ?? alternates(slug);
     <meta property="og:image" content={og} />
     <meta property="og:locale" content={htmlLang === 'en' ? 'en_MY' : 'ms_MY'} />
     <meta name="twitter:card" content="summary_large_image" />
-    {jsonLd.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
+    {jsonLd.map((ld) => <script type="application/ld+json" set:html={jsonLdScript(ld)} />)}
   </head>
   <body>
-    <header class="site"><div class="wrap">
-      <a href="https://aruspay.com.my/"><img src={`${BASE}/logo.png`} alt="ArusPay" width="120" height="32" /></a>
-      <a href={`${BASE}/${htmlLang}/`} style="margin-left:1rem">{t.blogName}</a>
-      {switchHref && <a href={switchHref} style="float:right">{t.switchLang}</a>}
-    </div></header>
+    <header class="site"><nav class="wrap nav" aria-label={t.blogName}>
+      <a href="https://aruspay.com.my/"><img class="logo" src={`${BASE}/logo.png`} alt="ArusPay" /></a>
+      <a href={`${BASE}/${htmlLang}/`}>{t.blogName}</a>
+      {switchHref && <a class="switch" href={switchHref}>{t.switchLang}</a>}
+    </nav></header>
     <main class="wrap"><slot /></main>
     <footer class="site"><div class="wrap">© {new Date().getFullYear()} Arus Technologies · <a href="https://aruspay.com.my/">aruspay.com.my</a></div></footer>
   </body>

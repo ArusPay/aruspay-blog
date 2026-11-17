@@ -23,9 +23,10 @@ for (const file of htmlFiles(ROOT)) {
   for (const h of ['en', 'ms', 'x-default']) {
     if (!html.includes(`hreflang="${h}"`)) fail(file, `hreflang ${h} missing`);
   }
-  const noindex = /<meta name="robots" content="noindex, nofollow"\s*\/?>/.test(html);
-  if (env === 'staging' && !noindex) fail(file, 'staging page without noindex');
-  if (env === 'production' && noindex) fail(file, 'production page with noindex');
+  const stagingNoindex = /<meta name="robots" content="noindex, nofollow"\s*\/?>/.test(html);
+  const anyNoindex = /<meta name="robots"[^>]*noindex/.test(html);
+  if (env === 'staging' && !stagingNoindex) fail(file, 'staging page without noindex');
+  if (env === 'production' && anyNoindex) fail(file, 'production page with noindex');
   for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
     try { JSON.parse(m[1]); } catch { fail(file, 'invalid JSON-LD'); }
   }

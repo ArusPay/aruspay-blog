@@ -25,6 +25,10 @@ export function tagAlternates(tag: string): { hreflang: string; href: string }[]
   ];
 }
 
+export function jsonLdScript(ld: object): string {
+  return JSON.stringify(ld).replace(/</g, '\\u003c');
+}
+
 const PUBLISHER = {
   '@type': 'Organization',
   name: 'ArusPay',

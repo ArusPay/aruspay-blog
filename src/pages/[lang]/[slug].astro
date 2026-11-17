@@ -27,7 +27,7 @@ const jsonLd = [
 ---
 <BaseLayout title={`${d.title} | ${t.blogName}`} description={d.description} lang={lang} canonicalPath={postPath(lang, slug)} slug={slug} ogImage={absolute(og.src)} jsonLd={jsonLd}>
   <article>
-    <p class="eyebrow">{d.tags.map((tag) => <a href={tagPath(lang, tag)}>{tag}</a>)}</p>
+    <p class="eyebrow tags">{d.tags.map((tag) => <a href={tagPath(lang, tag)}>{tag}</a>)}</p>
     <h1>{d.title}</h1>
     <p class="meta">{dateFmt(lang, d.date)}{d.updated > d.date && ` · ${t.updated} ${dateFmt(lang, d.updated)}`}</p>
     <Image src={d.heroImage} alt={d.heroAlt} width={1200} loading="eager" />

@@ -15,4 +15,4 @@ export const ui: Record<Lang, Record<string, string>> = {
 };
 export const otherLang = (lang: Lang): Lang => (lang === 'en' ? 'ms' : 'en');
 export const dateFmt = (lang: Lang, d: Date) =>
-  d.toLocaleDateString(lang === 'en' ? 'en-MY' : 'ms-MY', { year: 'numeric', month: 'long', day: 'numeric' });
+  d.toLocaleDateString(lang === 'en' ? 'en-MY' : 'ms-MY', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });

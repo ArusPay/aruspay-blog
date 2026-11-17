@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { postPath, listPath, tagPath, absolute, alternates, tagAlternates, articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '../src/lib/seo';
+import { postPath, listPath, tagPath, absolute, alternates, tagAlternates, jsonLdScript, articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '../src/lib/seo';
 
 describe('paths', () => {
   it('builds trailing-slash paths under /blog', () => {
@@ -56,5 +56,15 @@ describe('tagAlternates', () => {
       { hreflang: 'ms', href: 'https://aruspay.com.my/blog/ms/tags/payments/' },
       { hreflang: 'x-default', href: 'https://aruspay.com.my/blog/' },
     ]);
+  });
+});
+
+describe('jsonLdScript', () => {
+  it('escapes < so frontmatter cannot close the script tag', () => {
+    const ld = { headline: 'x </script><script>alert(1)</script>' };
+    const out = jsonLdScript(ld);
+    expect(out).not.toContain('</script>');
+    expect(out).not.toContain('<');
+    expect(JSON.parse(out)).toEqual(ld);
   });
 });
