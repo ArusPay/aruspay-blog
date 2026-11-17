@@ -1,6 +1,6 @@
 // Verifies built HTML in dist/blog. Run after `npm run build:<env>`.
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative, sep } from 'node:path';
 
 const ROOT = 'dist/blog';
 const env = readFileSync('dist/.blog-env', 'utf8').trim(); // written by write-headers.mjs
@@ -16,12 +16,42 @@ function htmlFiles(dir) {
 
 if (!existsSync(join(ROOT, 'index.html'))) fail(ROOT, 'missing index.html');
 
+const SITE = 'https://aruspay.com.my';
+
+// dist/blog/en/x/index.html -> https://aruspay.com.my/blog/en/x/
+function urlForFile(file) {
+  const rel = relative('dist', file).split(sep).join('/'); // blog/en/x/index.html
+  return `${SITE}/${rel.replace(/index\.html$/, '')}`;
+}
+function fileForUrl(url) {
+  if (!url.startsWith(`${SITE}/`)) return null;
+  const path = url.slice(SITE.length + 1);
+  return join('dist', path.endsWith('/') ? `${path}index.html` : path);
+}
+
 for (const file of htmlFiles(ROOT)) {
-  if (file.endsWith('404.html')) continue;
   const html = readFileSync(file, 'utf8');
+
+  // Backstop against active content, whatever the source (markdown, frontmatter, templates).
+  for (const m of html.matchAll(/<script\b([^>]*)>/gi)) {
+    if (!/type\s*=\s*["']?application\/ld\+json/i.test(m[1])) fail(file, `non-JSON-LD <script> (${m[0].slice(0, 60)})`);
+  }
+  for (const m of html.matchAll(/<[a-z][^>]*>/gi)) {
+    if (/\son[a-z]+\s*=/i.test(m[0])) fail(file, `inline event handler in ${m[0].slice(0, 60)}`);
+  }
+  if (/javascript:/i.test(html)) fail(file, 'javascript: URL present');
+  if (/<(iframe|object|embed|form)\b/i.test(html)) fail(file, 'iframe/object/embed/form element present');
+
+  if (file.endsWith('404.html')) continue;
   if (!/<link rel="canonical" href="https:\/\/aruspay\.com\.my\/blog\//.test(html)) fail(file, 'canonical missing or not on aruspay.com.my/blog');
   for (const h of ['en', 'ms', 'x-default']) {
     if (!html.includes(`hreflang="${h}"`)) fail(file, `hreflang ${h} missing`);
+  }
+  const canonical = /<link rel="canonical" href="([^"]*)"/.exec(html)?.[1];
+  if (canonical && canonical !== urlForFile(file)) fail(file, `canonical ${canonical} != ${urlForFile(file)}`);
+  for (const m of html.matchAll(/<link rel="alternate" hreflang="[^"]*" href="([^"]*)"/g)) {
+    const target = fileForUrl(m[1]);
+    if (!target || !existsSync(target)) fail(file, `hreflang href ${m[1]} has no built file`);
   }
   const stagingNoindex = /<meta name="robots" content="noindex, nofollow"\s*\/?>/.test(html);
   const anyNoindex = /<meta name="robots"[^>]*noindex/.test(html);
@@ -34,13 +64,23 @@ for (const file of htmlFiles(ROOT)) {
   if (isArticle && !html.includes('"@type":"Article"')) fail(file, 'article without Article JSON-LD');
 }
 
-const draftBuilt = existsSync(join(ROOT, 'en/contoh-artikel/index.html'));
-if (env === 'production' && draftBuilt) fail('contoh-artikel', 'draft built in production');
-if (env === 'staging' && !draftBuilt) fail('contoh-artikel', 'draft missing on staging');
+const postsDir = 'src/content/posts';
+for (const slug of readdirSync(postsDir)) {
+  const src = join(postsDir, slug, 'en.md');
+  if (!existsSync(src)) continue;
+  const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readFileSync(src, 'utf8'))?.[1] ?? '';
+  const isDraft = /^draft:\s*true\b/m.test(frontmatter);
+  const built = existsSync(join(ROOT, 'en', slug, 'index.html'));
+  if (isDraft && env === 'production' && built) fail(slug, 'draft built in production');
+  if (isDraft && env === 'staging' && !built) fail(slug, 'draft missing on staging');
+  if (!isDraft && !built) fail(slug, 'published post not built');
+}
 
 const headers = readFileSync('dist/_headers', 'utf8');
 if (env === 'staging' && !headers.includes('X-Robots-Tag: noindex')) fail('dist/_headers', 'staging without X-Robots-Tag');
 if (env === 'production' && headers.includes('noindex')) fail('dist/_headers', 'production has noindex');
+if (!headers.includes('Content-Security-Policy:') || !headers.includes('X-Content-Type-Options: nosniff')) fail('dist/_headers', 'CSP / nosniff missing');
+if (!existsSync('dist/.assetsignore') || !readFileSync('dist/.assetsignore', 'utf8').includes('.blog-env')) fail('dist/.assetsignore', 'missing or does not ignore .blog-env');
 
 if (errors.length) { console.error(errors.join('\n')); process.exit(1); }
 console.log(`check-build OK (${env})`);
