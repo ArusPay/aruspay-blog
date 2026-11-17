@@ -11,11 +11,11 @@ describe('paths', () => {
 });
 
 describe('alternates', () => {
-  it('links both languages plus x-default for a post', () => {
+  it('links both languages plus EN as x-default for a post', () => {
     expect(alternates('aruspay-vs-stripe')).toEqual([
       { hreflang: 'en', href: 'https://aruspay.com.my/blog/en/aruspay-vs-stripe/' },
       { hreflang: 'ms', href: 'https://aruspay.com.my/blog/ms/aruspay-vs-stripe/' },
-      { hreflang: 'x-default', href: 'https://aruspay.com.my/blog/' },
+      { hreflang: 'x-default', href: 'https://aruspay.com.my/blog/en/aruspay-vs-stripe/' },
     ]);
   });
   it('links list pages when slug is null', () => {
@@ -50,11 +50,11 @@ describe('json-ld', () => {
 });
 
 describe('tagAlternates', () => {
-  it('links per-language tag pages plus the blog root as x-default', () => {
+  it('links per-language tag pages plus the EN tag page as x-default', () => {
     expect(tagAlternates('payments')).toEqual([
       { hreflang: 'en', href: 'https://aruspay.com.my/blog/en/tags/payments/' },
       { hreflang: 'ms', href: 'https://aruspay.com.my/blog/ms/tags/payments/' },
-      { hreflang: 'x-default', href: 'https://aruspay.com.my/blog/' },
+      { hreflang: 'x-default', href: 'https://aruspay.com.my/blog/en/tags/payments/' },
     ]);
   });
 });

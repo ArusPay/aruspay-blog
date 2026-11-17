@@ -13,7 +13,7 @@ export function alternates(slug: string | null): { hreflang: string; href: strin
   return [
     { hreflang: 'en', href: absolute(path('en')) },
     { hreflang: 'ms', href: absolute(path('ms')) },
-    { hreflang: 'x-default', href: absolute(`${BASE}/`) },
+    { hreflang: 'x-default', href: absolute(slug ? postPath('en', slug) : `${BASE}/`) },
   ];
 }
 
@@ -21,7 +21,7 @@ export function tagAlternates(tag: string): { hreflang: string; href: string }[]
   return [
     { hreflang: 'en', href: absolute(tagPath('en', tag)) },
     { hreflang: 'ms', href: absolute(tagPath('ms', tag)) },
-    { hreflang: 'x-default', href: absolute(`${BASE}/`) },
+    { hreflang: 'x-default', href: absolute(tagPath('en', tag)) },
   ];
 }
 
