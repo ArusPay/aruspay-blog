@@ -17,11 +17,12 @@ const posts = defineCollection({
         heroImage: image(),
         heroAlt: z.string().min(5),
         sources: z
-          .array(z.object({ url: z.string().url(), title: z.string().min(2), accessed: z.coerce.date() }))
+          .array(z.object({ url: z.string().url().refine((u) => /^https?:\/\//.test(u), 'source url must be http(s)'), title: z.string().min(2), accessed: z.coerce.date() }))
           .default([]),
         faq: z.array(z.object({ q: z.string().min(5), a: z.string().min(5) })).default([]),
         draft: z.boolean().default(false),
       })
+      .strict()
       .refine((d) => d.type !== 'comparison' || d.sources.length > 0, {
         message: 'comparison posts need at least one source',
         path: ['sources'],

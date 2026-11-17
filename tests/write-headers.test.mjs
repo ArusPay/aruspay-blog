@@ -14,4 +14,15 @@ describe('headersFor', () => {
       expect(headersFor(env)).toContain('/blog/_astro/*\n  Cache-Control: public, max-age=31536000, immutable');
     }
   });
+  it('locks down /blog/* with CSP and nosniff in both envs', () => {
+    for (const env of ['staging', 'production']) {
+      const h = headersFor(env);
+      expect(h).toMatch(/^\/blog\/\*\n(  .+\n)*  Content-Security-Policy: default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'$/m);
+      expect(h).toMatch(/^  X-Content-Type-Options: nosniff$/m);
+    }
+  });
+  it('keeps noindex staging-only', () => {
+    expect(headersFor('staging')).toContain('/*\n  X-Robots-Tag: noindex, nofollow');
+    expect(headersFor('production')).not.toContain('X-Robots-Tag');
+  });
 });
