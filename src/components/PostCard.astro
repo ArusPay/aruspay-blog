@@ -1,0 +1,15 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { postPath } from '../lib/seo';
+import { parsePostId } from '../lib/posts';
+import { ui, dateFmt } from '../i18n/ui';
+interface Props { post: CollectionEntry<'posts'> }
+const { post } = Astro.props;
+const { slug, lang } = parsePostId(post.id);
+---
+<a class="card" href={postPath(lang, slug)}>
+  <span class="eyebrow">{post.data.tags[0]}</span>
+  <h2>{post.data.title}</h2>
+  <p>{post.data.description}</p>
+  <span class="meta">{dateFmt(lang, post.data.date)} · {ui[lang].readMore} →</span>
+</a>

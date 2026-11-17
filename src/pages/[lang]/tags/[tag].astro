@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/PostCard.astro';
+import { getVisiblePosts } from '../../../lib/content';
+import { LANGS, type Lang } from '../../../lib/posts';
+import { tagPath, tagAlternates } from '../../../lib/seo';
+import { ui } from '../../../i18n/ui';
+export async function getStaticPaths() {
+  const posts = await getVisiblePosts();
+  const tags = new Set(posts.flatMap((p) => p.data.tags));
+  return LANGS.flatMap((lang) => [...tags].map((tag) => ({ params: { lang, tag } })));
+}
+const lang = Astro.params.lang as Lang;
+const tag = Astro.params.tag as string;
+const t = ui[lang];
+const posts = (await getVisiblePosts()).filter((p) => p.id.endsWith(`/${lang}`) && p.data.tags.includes(tag));
+---
+<BaseLayout title={`${t.tagged}: ${tag} | ${t.blogName}`} description={`${t.blogName} — ${t.tagged}: ${tag}`} lang={lang} canonicalPath={tagPath(lang, tag)} alternateLinks={tagAlternates(tag)}>
+  <h1>{t.tagged}: {tag}</h1>
+  {posts.map((post) => <PostCard post={post} />)}
+</BaseLayout>

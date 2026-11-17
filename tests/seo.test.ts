@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { postPath, listPath, tagPath, absolute, alternates, articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '../src/lib/seo';
+import { postPath, listPath, tagPath, absolute, alternates, tagAlternates, articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '../src/lib/seo';
 
 describe('paths', () => {
   it('builds trailing-slash paths under /blog', () => {
@@ -46,5 +46,15 @@ describe('json-ld', () => {
     expect(faqJsonLd([])).toBeNull();
     const ld = faqJsonLd([{ q: 'Q?', a: 'A.' }]) as { mainEntity: unknown[] };
     expect(ld.mainEntity).toHaveLength(1);
+  });
+});
+
+describe('tagAlternates', () => {
+  it('links per-language tag pages plus the blog root as x-default', () => {
+    expect(tagAlternates('payments')).toEqual([
+      { hreflang: 'en', href: 'https://aruspay.com.my/blog/en/tags/payments/' },
+      { hreflang: 'ms', href: 'https://aruspay.com.my/blog/ms/tags/payments/' },
+      { hreflang: 'x-default', href: 'https://aruspay.com.my/blog/' },
+    ]);
   });
 });

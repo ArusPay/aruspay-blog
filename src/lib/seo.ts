@@ -17,6 +17,14 @@ export function alternates(slug: string | null): { hreflang: string; href: strin
   ];
 }
 
+export function tagAlternates(tag: string): { hreflang: string; href: string }[] {
+  return [
+    { hreflang: 'en', href: absolute(tagPath('en', tag)) },
+    { hreflang: 'ms', href: absolute(tagPath('ms', tag)) },
+    { hreflang: 'x-default', href: absolute(`${BASE}/`) },
+  ];
+}
+
 const PUBLISHER = {
   '@type': 'Organization',
   name: 'ArusPay',

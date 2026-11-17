@@ -1,3 +1,13 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { getVisiblePosts } from '../lib/content';
+import { BASE } from '../lib/seo';
+const posts = (await getVisiblePosts()).filter((p) => p.id.endsWith('/en')).slice(0, 5);
 ---
-<html lang="en"><head><meta charset="utf-8" /><title>ArusPay Blog</title></head><body><h1>ArusPay Blog</h1></body></html>
+<BaseLayout title="ArusPay Blog — payments for Malaysian businesses" description="Guides, comparisons and news on online payments, DuitNow and collections for Malaysian businesses, in English and Bahasa Melayu." lang="x-default" canonicalPath={`${BASE}/`}>
+  <p class="eyebrow">ArusPay Blog</p>
+  <h1>Payments, explained for Malaysian businesses</h1>
+  <p><a href={`${BASE}/en/`}>English</a> · <a href={`${BASE}/ms/`}>Bahasa Melayu</a></p>
+  {posts.map((post) => <PostCard post={post} />)}
+</BaseLayout>

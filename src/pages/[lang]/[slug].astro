@@ -1,0 +1,43 @@
+---
+import { render } from 'astro:content';
+import { getImage, Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPairs } from '../../lib/content';
+import { LANGS, type Lang } from '../../lib/posts';
+import { postPath, listPath, tagPath, absolute, articleJsonLd, breadcrumbJsonLd, faqJsonLd } from '../../lib/seo';
+import { ui, dateFmt } from '../../i18n/ui';
+
+export async function getStaticPaths() {
+  const pairs = await getPairs();
+  return [...pairs].flatMap(([slug, pair]) => LANGS.map((lang) => ({ params: { lang, slug }, props: { post: pair[lang] } })));
+}
+const { post } = Astro.props;
+const lang = Astro.params.lang as Lang;
+const slug = Astro.params.slug as string;
+const t = ui[lang];
+const d = post.data;
+const { Content } = await render(post);
+const og = await getImage({ src: d.heroImage, width: 1200, format: 'webp' });
+const url = absolute(postPath(lang, slug));
+const jsonLd = [
+  articleJsonLd({ title: d.title, description: d.description, url, image: absolute(og.src), datePublished: d.date, dateModified: d.updated, lang }),
+  breadcrumbJsonLd([{ name: t.blogName, url: absolute(listPath(lang)) }, { name: d.title, url }]),
+  faqJsonLd(d.faq),
+].filter((x): x is object => x !== null);
+---
+<BaseLayout title={`${d.title} | ${t.blogName}`} description={d.description} lang={lang} canonicalPath={postPath(lang, slug)} slug={slug} ogImage={absolute(og.src)} jsonLd={jsonLd}>
+  <article>
+    <p class="eyebrow">{d.tags.map((tag) => <a href={tagPath(lang, tag)}>{tag}</a>)}</p>
+    <h1>{d.title}</h1>
+    <p class="meta">{dateFmt(lang, d.date)}{d.updated > d.date && ` · ${t.updated} ${dateFmt(lang, d.updated)}`}</p>
+    <Image src={d.heroImage} alt={d.heroAlt} width={1200} loading="eager" />
+    <Content />
+    {d.faq.length > 0 && (
+      <section><h2>{t.faq}</h2>{d.faq.map((f) => <details><summary>{f.q}</summary><p>{f.a}</p></details>)}</section>
+    )}
+    {d.sources.length > 0 && (
+      <section><h2>{t.sources}</h2><ol>{d.sources.map((s) => <li><a href={s.url} rel="nofollow noopener" target="_blank">{s.title}</a> <span class="meta">({dateFmt(lang, s.accessed)})</span></li>)}</ol></section>
+    )}
+    <aside class="cta"><h2 style="margin-top:0">{t.ctaTitle}</h2><a href={`https://aruspay.com.my/?utm_source=blog&utm_medium=cta&utm_campaign=${slug}`}>{t.ctaButton}</a></aside>
+  </article>
+</BaseLayout>

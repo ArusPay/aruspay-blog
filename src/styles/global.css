@@ -1,0 +1,23 @@
+@import '@fontsource-variable/urbanist';
+:root {
+  --bg: #FBF7EF; --ink: #1A241C; --muted: #6B7566; --eyebrow: #435E41;
+  --panel: #EAE5D8; --accent: #DAE9C9; --max: 46rem;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 1.0625rem/1.7 'Urbanist Variable', system-ui, sans-serif; }
+a { color: var(--eyebrow); }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 1rem; }
+header.site, footer.site { border-bottom: 1px solid var(--panel); padding: 1rem 0; }
+footer.site { border-top: 1px solid var(--panel); border-bottom: 0; margin-top: 4rem; color: var(--muted); font-size: .9rem; }
+.eyebrow { color: var(--eyebrow); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: .8rem; }
+h1 { font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.15; margin: .4rem 0 1rem; }
+h2 { margin-top: 2.4rem; line-height: 1.25; }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+.meta { color: var(--muted); font-size: .9rem; }
+.cta { background: var(--accent); border-radius: 16px; padding: 1.5rem; margin: 3rem 0; }
+.cta a { display: inline-block; background: var(--ink); color: #fff; padding: .7rem 1.2rem; border-radius: 999px; text-decoration: none; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: .95rem; display: block; overflow-x: auto; }
+th, td { text-align: left; padding: .6rem .7rem; border-bottom: 1px solid var(--panel); }
+th { background: var(--panel); }
+.card { display: block; padding: 1.2rem 0; border-bottom: 1px solid var(--panel); text-decoration: none; color: inherit; }
+.card h2 { margin: .2rem 0; font-size: 1.3rem; }

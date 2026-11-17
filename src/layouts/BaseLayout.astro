@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+import { alternates, absolute, BASE } from '../lib/seo';
+import { BLOG_ENV, type Lang } from '../lib/posts';
+import { ui, otherLang } from '../i18n/ui';
+
+interface Props {
+  title: string; description: string; lang: Lang | 'x-default'; canonicalPath: string;
+  slug?: string | null; ogImage?: string; jsonLd?: object[];
+  alternateLinks?: { hreflang: string; href: string }[];
+}
+const { title, description, lang, canonicalPath, slug = null, ogImage, jsonLd = [], alternateLinks } = Astro.props;
+const htmlLang = lang === 'x-default' ? 'en' : lang;
+const t = ui[htmlLang];
+const switchHref = lang === 'x-default' ? null : slug ? `${BASE}/${otherLang(lang)}/${slug}/` : `${BASE}/${otherLang(lang)}/`;
+const og = ogImage ?? absolute(`${BASE}/logo.png`);
+const links = alternateLinks ?? alternates(slug);
+---
+<!doctype html>
+<html lang={htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {BLOG_ENV === 'staging' && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={absolute(canonicalPath)} />
+    {links.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+    <link rel="alternate" type="application/rss+xml" title={t.blogName} href={`${BASE}/${htmlLang}/rss.xml`} />
+    <link rel="icon" href={`${BASE}/favicon.png`} />
+    <meta property="og:type" content={slug ? 'article' : 'website'} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={absolute(canonicalPath)} />
+    <meta property="og:image" content={og} />
+    <meta property="og:locale" content={htmlLang === 'en' ? 'en_MY' : 'ms_MY'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {jsonLd.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
+  </head>
+  <body>
+    <header class="site"><div class="wrap">
+      <a href="https://aruspay.com.my/"><img src={`${BASE}/logo.png`} alt="ArusPay" width="120" height="32" /></a>
+      <a href={`${BASE}/${htmlLang}/`} style="margin-left:1rem">{t.blogName}</a>
+      {switchHref && <a href={switchHref} style="float:right">{t.switchLang}</a>}
+    </div></header>
+    <main class="wrap"><slot /></main>
+    <footer class="site"><div class="wrap">© {new Date().getFullYear()} Arus Technologies · <a href="https://aruspay.com.my/">aruspay.com.my</a></div></footer>
+  </body>
+</html>
