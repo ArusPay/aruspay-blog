@@ -1,0 +1,30 @@
+{
+  // Assets-only Worker. The site is built into ./dist/blog so URL /blog/... maps to a file.
+  // Top level = production Worker "aruspay-blog": NO routes until the launch PR (Plan 3).
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "aruspay-blog",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": false,
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "observability": { "enabled": true },
+  "env": {
+    "staging": {
+      // Becomes the Worker "aruspay-blog-staging".
+      "workers_dev": true,
+      "preview_urls": true,
+      "assets": {
+        "directory": "./dist",
+        "not_found_handling": "404-page",
+        "html_handling": "auto-trailing-slash"
+      },
+      "routes": [
+        { "pattern": "staging.aruspay.com.my/blog", "zone_name": "aruspay.com.my" },
+        { "pattern": "staging.aruspay.com.my/blog/*", "zone_name": "aruspay.com.my" }
+      ]
+    }
+  }
+}
