@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { alternates, absolute, jsonLdScript, BASE } from '../lib/seo';
 import { BLOG_ENV, type Lang } from '../lib/posts';
 import { ui, otherLang } from '../i18n/ui';
+import { beaconToken } from '../lib/beacon';
 
 interface Props {
   title: string; description: string; lang: Lang | 'x-default'; canonicalPath: string;
@@ -17,6 +18,7 @@ const links = alternateLinks ?? alternates(slug);
 const switchHref = lang === 'x-default' ? null
   : alternateLinks ? (() => { const h = alternateLinks.find((a) => a.hreflang === otherLang(lang))?.href; return h ? new URL(h).pathname : null; })()
   : slug ? `${BASE}/${otherLang(lang)}/${slug}/` : `${BASE}/${otherLang(lang)}/`;
+const cfBeacon = beaconToken(BLOG_ENV, process.env.PUBLIC_CF_BEACON_TOKEN);
 ---
 <!doctype html>
 <html lang={htmlLang}>
@@ -47,5 +49,6 @@ const switchHref = lang === 'x-default' ? null
     </nav></header>
     <main class="wrap"><slot /></main>
     <footer class="site"><div class="wrap">© {new Date().getFullYear()} Arus Technologies · <a href="https://aruspay.com.my/">aruspay.com.my</a></div></footer>
+    {cfBeacon && <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: cfBeacon })}></script>}
   </body>
 </html>
