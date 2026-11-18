@@ -4,8 +4,12 @@ import { writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 export function headersFor(env) {
+  const prod = env === 'production';
   const csp = [
-    "default-src 'self'", "script-src 'none'", "style-src 'self' 'unsafe-inline'", "img-src 'self' data:",
+    "default-src 'self'",
+    prod ? "script-src 'self' https://static.cloudflareinsights.com" : "script-src 'none'",
+    ...(prod ? ["connect-src 'self' https://cloudflareinsights.com"] : []),
+    "style-src 'self' 'unsafe-inline'", "img-src 'self' data:",
     "font-src 'self'", "object-src 'none'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'none'",
   ].join('; ');
   const rules = [`/blog/*\n  Content-Security-Policy: ${csp}\n  X-Content-Type-Options: nosniff`, '/blog/_astro/*\n  Cache-Control: public, max-age=31536000, immutable'];

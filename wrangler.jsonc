@@ -1,10 +1,14 @@
 {
   // Assets-only Worker. The site is built into ./dist/blog so URL /blog/... maps to a file.
-  // Top level = production Worker "aruspay-blog": NO routes until the launch PR (Plan 3).
+  // Top level = production Worker "aruspay-blog"; the /blog routes below are live on aruspay.com.my.
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "aruspay-blog",
   "compatibility_date": "2026-11-01",
   "workers_dev": false,
+  "routes": [
+    { "pattern": "aruspay.com.my/blog", "zone_name": "aruspay.com.my" },
+    { "pattern": "aruspay.com.my/blog/*", "zone_name": "aruspay.com.my" }
+  ],
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page",

@@ -16,6 +16,9 @@ function htmlFiles(dir) {
 
 if (!existsSync(join(ROOT, 'index.html'))) fail(ROOT, 'missing index.html');
 
+// Exact serialisation Astro emits for the beacon tag (attributes after `<script`).
+const BEACON = /^ defer src="https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js" data-cf-beacon="\{&quot;token&quot;:&quot;[a-f0-9]{32}&quot;\}"$/;
+
 const SITE = 'https://aruspay.com.my';
 
 // dist/blog/en/x/index.html -> https://aruspay.com.my/blog/en/x/
@@ -33,8 +36,11 @@ for (const file of htmlFiles(ROOT)) {
   const html = readFileSync(file, 'utf8');
 
   // Backstop against active content, whatever the source (markdown, frontmatter, templates).
+  // Production may carry exactly one script besides JSON-LD: the Cloudflare Web Analytics beacon.
   for (const m of html.matchAll(/<script\b([^>]*)>/gi)) {
-    if (!/type\s*=\s*["']?application\/ld\+json/i.test(m[1])) fail(file, `non-JSON-LD <script> (${m[0].slice(0, 60)})`);
+    if (/type\s*=\s*["']?application\/ld\+json/i.test(m[1])) continue;
+    if (env === 'production' && BEACON.test(m[1])) continue;
+    fail(file, `unexpected <script> (${m[0].slice(0, 80)})`);
   }
   for (const m of html.matchAll(/<[a-z][^>]*>/gi)) {
     if (/\son[a-z]+\s*=/i.test(m[0])) fail(file, `inline event handler in ${m[0].slice(0, 60)}`);
