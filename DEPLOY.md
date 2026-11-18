@@ -11,17 +11,24 @@ Workers Builds settings for `aruspay-blog-staging`:
 - Deploy command: `npx wrangler deploy --env staging`
 - Non-production branch deploy command: `npx wrangler versions upload --env staging`
 
-Workers Builds settings for `aruspay-blog` (connected at launch):
+Workers Builds settings for `aruspay-blog` (connected 2026-11-18, build token "aruspay-blog build token"):
 - Production branch: `main`; non-production builds disabled
 - Build command: `npm run build:production` (includes the SEO/safety gate `check:build`)
 - Deploy command: `npm run deploy:production` (refuses unless `dist` is a production build, then `npx wrangler deploy`)
-- Build variable: `PUBLIC_CF_BEACON_TOKEN` = Cloudflare Web Analytics site tag (32 hex chars, public, production only; without it no beacon is emitted)
+- Build variable: none. `PUBLIC_CF_BEACON_TOKEN` is intentionally unset: the zone's existing Web Analytics site `aruspay.com.my` (automatic setup) already injects its beacon into every HTML response, including this Worker's, and the production CSP allows it. Setting the token too would count every visit twice. Filter Web Analytics by path `/blog` to see blog traffic. (Staging's CSP blocks the injected beacon.)
 - Preview builds: off
 
 Publishing = merging. Article PRs target `Staging`; promotion is a PR `Staging` → `main`.
 Only Mutalib merges (ruleset "protect-staging-main").
 
 Required status check `verify` is set in the ruleset (Task 7).
+
+## Launch record (2026-11-18)
+- Production live at https://aruspay.com.my/blog/ (release PR #5, `main` @ e8b880c).
+- The first production build ran from `Staging` (Cloudflare's default branch at creation); the production branch was switched to `main` right after.
+- Google Search Console: Domain property `aruspay.com.my` owned by mutalib@aruspay.com.my, verified by a DNS TXT `google-site-verification=nizRQt11…` at the zone root (a second, older `google-site-verification` TXT belongs to another account; keep both). Sitemap submitted: `https://aruspay.com.my/blog/sitemap-index.xml`. Indexing requested for both EN article URLs.
+- Bing Webmaster Tools: not set up yet.
+- Hermes cron jobs (VPS `aruspay-ai-vps`): `blog-monday-topics` (Monday proposals), daily LinkedIn draft check (`blog_published`), GitHub token reminder (8 Feb 2027).
 
 Rollback: `npx wrangler versions list --name <worker>` then
 `npx wrangler versions deploy <version-id> --name <worker> -y`, or revert the merge on GitHub.
