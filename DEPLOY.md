@@ -28,7 +28,7 @@ Required status check `verify` is set in the ruleset (Task 7).
 - The first production build ran from `Staging` (Cloudflare's default branch at creation); the production branch was switched to `main` right after.
 - Google Search Console: Domain property `aruspay.com.my` owned by mutalib@aruspay.com.my, verified by a DNS TXT `google-site-verification=nizRQt11…` at the zone root (a second, older `google-site-verification` TXT belongs to another account; keep both). Sitemap submitted: `https://aruspay.com.my/blog/sitemap-index.xml`. Indexing requested for both EN article URLs.
 - Bing Webmaster Tools: not set up yet.
-- Hermes cron jobs (VPS `aruspay-ai-vps`): `blog-monday-topics` (Monday proposals), daily LinkedIn draft check (`blog_published`), GitHub token reminder (8 Feb 2027).
+- Hermes cron jobs (VPS `aruspay-ai-vps`): `blog-monday-topics` (Monday proposals), `blog-linkedin-drafts` (daily 10:00 LinkedIn drafts via `blog_published`), `blog-token-expiry-reminder` (8 Feb 2027).
 
 Rollback: `npx wrangler versions list --name <worker>` then
 `npx wrangler versions deploy <version-id> --name <worker> -y`, or revert the merge on GitHub.
